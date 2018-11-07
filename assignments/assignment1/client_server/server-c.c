@@ -46,6 +46,12 @@ int server(char *server_port) {
                         return sockfd;
                 }
 
+                int yes=1;
+                if (setsockopt(sockfd, SOL_SOCKET,SO_REUSEADDR,&yes,sizeof yes) == -1) {
+                        perror("setsockopt");
+                        exit(1);
+                }
+
                 if ((bind(sockfd, p->ai_addr, p->ai_addrlen)) == -1) {
                         perror("server: bind");
                         return -1;
@@ -68,15 +74,23 @@ int server(char *server_port) {
                         continue;
                 }
 
-                if (recv(client_sock_fd, &recv_data, RECV_BUFFER_SIZE, 0) == -1) {
-                        perror("server : Client error. Continue");
-                        continue;
-                }
+                while (1) {
+                        s = recv(client_sock_fd, &recv_data, RECV_BUFFER_SIZE, 0);
+                        if (s == -1) {
+                                perror("server : Client error. Continue");
+                                close(client_sock_fd);
+                                break;
+                        } else if (s == 0) {
+                                close(client_sock_fd);
+                                break;
+                        }
 
-                fprintf(stdout, "%s", recv_data);
-                fflush(stdout);
+                        fwrite(recv_data, sizeof(char), s, stdout);
+                        fflush(stdout);
+                }
         }
 
+        close(sockfd);
         freeaddrinfo(serv_info);
 
         return 0;

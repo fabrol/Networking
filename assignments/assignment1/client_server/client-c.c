@@ -24,17 +24,20 @@
 */
 
 int send_buffer(char * send_data, int count, int sockfd) {
-        int call_bytes_sent, send_off;
+        int call_bytes_sent, send_off, bytes_left;
+        bytes_left = count;
 
+        send_off = 0;
         while (send_off != count) {
                 if ((call_bytes_sent = send(sockfd,
                                                 send_data+send_off,
-                                                count,
+                                                bytes_left,
                                                 0)) == -1) {
                         perror("Client: Send");
                         return -1;
                 }
                 send_off += call_bytes_sent;
+                bytes_left -= call_bytes_sent;
         }
         return 0;
 }
@@ -91,6 +94,7 @@ int client(char *server_ip, char *server_port) {
                         }
         }
 
+        close(sockfd);
         freeaddrinfo(serv_info);
 
         return 0;

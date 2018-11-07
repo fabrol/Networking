@@ -80,8 +80,8 @@ function all-tests {
   ###############################################################################
 
   printf "\n$testNum. TEST RANDOM ALPHANUMERIC MESSAGE\n"
-  head -c100000 /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' > test_message.txt
-  test "$1" "$2" $3 1 0
+  head -c20000 /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' > test_message.txt
+  test "$1" "$2" $3 1 1
   ((testNum++))
 
   ###############################################################################
